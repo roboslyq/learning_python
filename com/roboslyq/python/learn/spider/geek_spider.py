@@ -53,6 +53,7 @@ def parse_url_to_html(url, name):
         html = str(body)
         # body中的img标签的src相对路径的改成绝对路径,注意"? src"之间有一个空格
         pattern1 = "(<img .*? src=\")(.*?)(\")"
+        pattern2 = re.compile(r'(<iframe)(.*?)(</iframe>)')
 
         def func1(m):
             if not m.group(3).startswith("https"):
@@ -62,7 +63,7 @@ def parse_url_to_html(url, name):
                 return m.group(1) + m.group(2) + m.group(3)
 
         html = re.compile(pattern1).sub(func1, html)
-
+        html = pattern2.sub(r'', html)
         print(html)
         html = html_template.format(content=html)
         html = html.encode("utf-8")
@@ -86,9 +87,9 @@ def get_url_list():
     menu_tag = soup.find_all(id="x-wiki-index")[0]
     urls = []
     for tag in menu_tag.find_all("a"):
-        if len(urls) < 3:  # 调度时限定3个文件
-            url = "https://www.liaoxuefeng.com" + tag.get('href')
-            urls.append(url)
+        # if len(urls) < 3:  # 调度时限定3个文件
+        url = "https://www.liaoxuefeng.com" + tag.get('href')
+        urls.append(url)
     return urls
 
 
@@ -130,7 +131,7 @@ def main():
         parse_url_to_html(url, str(index) + ".html")
     htmls = []
     pdfs = []
-    for i in range(0, 124):
+    for i in range(0, len(urls) - 1):
         htmls.append(str(i) + '.html')
         pdfs.append(file_name + str(i) + '.pdf')
         save_pdf(str(i) + '.html', file_name + str(i) + '.pdf')
