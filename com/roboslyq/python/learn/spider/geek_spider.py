@@ -51,17 +51,19 @@ def parse_url_to_html(url, name):
         center_tag.insert(1, title_tag)
         body.insert(1, center_tag)
         html = str(body)
-        # body中的img标签的src相对路径的改成绝对路径
-        pattern = "(<img .*?src=\")(.*?)(\")"
+        # body中的img标签的src相对路径的改成绝对路径,注意"? src"之间有一个空格
+        pattern1 = "(<img .*? src=\")(.*?)(\")"
 
-        def func(m):
-            if not m.group(3).startswith("http"):
-                rtn = m.group(1) + "http://www.liaoxuefeng.com" + m.group(2) + m.group(3)
+        def func1(m):
+            if not m.group(3).startswith("https"):
+                rtn = m.group(1) + "https://www.liaoxuefeng.com" + m.group(2) + m.group(3)
                 return rtn
             else:
                 return m.group(1) + m.group(2) + m.group(3)
 
-        html = re.compile(pattern).sub(func, html)
+        html = re.compile(pattern1).sub(func1, html)
+
+        print(html)
         html = html_template.format(content=html)
         html = html.encode("utf-8")
         with open(name, 'wb') as f:
@@ -79,7 +81,7 @@ def get_url_list():
 
     response = requests.get("https://www.liaoxuefeng.com/wiki/1016959663602400", headers=headers)
     soup = BeautifulSoup(response.content, "html.parser")
-    print(soup.prettify())
+    # print(soup.prettify())
     # menu_tag = soup.find_all(class_="x-wiki-index-item")[1]
     menu_tag = soup.find_all(id="x-wiki-index")[0]
     urls = []
@@ -115,7 +117,8 @@ def save_pdf(htmls, file_name):
     }
     path_wk = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
     config = pdfkit.configuration(wkhtmltopdf=path_wk)
-    htmls = r"D:\python_workspace\git\learning_python\com\roboslyq\python\learn\spider" + "\\" + htmls
+    # 此处需要绝对路径
+    htmls = r"D:\helloworld\workspace_python\learning_python\com\roboslyq\python\learn\spider" + "\\" + htmls
     pdfkit.from_file(htmls, file_name, options=options, configuration=config)
 
 
