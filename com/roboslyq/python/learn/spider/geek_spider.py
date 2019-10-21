@@ -84,8 +84,9 @@ def get_url_list():
     menu_tag = soup.find_all(id="x-wiki-index")[0]
     urls = []
     for tag in menu_tag.find_all("a"):
-        url = "https://www.liaoxuefeng.com" + tag.get('href')
-        urls.append(url)
+        if len(urls) < 3:  # 调度时限定3个文件
+            url = "https://www.liaoxuefeng.com" + tag.get('href')
+            urls.append(url)
     return urls
 
 
@@ -110,9 +111,12 @@ def save_pdf(htmls, file_name):
             ('cookie-name1', 'cookie-value1'),
             ('cookie-name2', 'cookie-value2'),
         ],
-        'outline-depth': 10,
+        # 'outline-depth': 10000000,
     }
-    pdfkit.from_file(htmls, file_name, options=options)
+    path_wk = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
+    config = pdfkit.configuration(wkhtmltopdf=path_wk)
+    htmls = r"D:\python_workspace\git\learning_python\com\roboslyq\python\learn\spider" + "\\" + htmls
+    pdfkit.from_file(htmls, file_name, options=options, configuration=config)
 
 
 def main():
