@@ -16,7 +16,7 @@ def readfile_xlsx():
         # 获取第0个sheet
         sheet0 = f.sheets()[0]
         rowsnumber = sheet0.nrows  # 获取行数
-        colsnumber = sheet0.ncols  # 获取列数
+        colsnumber = sheet0.ncols  # 获a取列数
         for i in range(rowsnumber):
             for j in range(colsnumber):
                 print(str(sheet0.row_values(i)[j])[1:3])
