@@ -9,6 +9,12 @@ import requests
 from PyPDF2 import PdfFileMerger
 from bs4 import BeautifulSoup
 
+headers = {"X-Member-Id": "23832170000",
+           "X-Region": "1100000",
+           "User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
+           "X-Channel": "01",
+           "Content-Type": "application/json;charset=UTF-8"}
+
 html_template = """
                   <!DOCTYPE html>
                   <html lang="en">
@@ -30,10 +36,12 @@ def parse_url_to_html(url, name):
     :return: html
     """
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, 'html.parser')
+        print(soup.prettify())
         # 正文
-        body = soup.find_all(class_="x-wiki-content")[0]
+        # body = soup.find_all(class_="x-wiki-content")[0]
+        body = soup.find_all(id="x-content")[0]
         # 标题
         title = soup.find('h4').get_text()
         # 标题加入到正文的最前面，居中显示
@@ -68,19 +76,15 @@ def get_url_list():
     获取所有URL目录列表
     :return:
     """
-    headers = {"X-Member-Id": "23832170000",
-               "X-Region": "1100000",
-               "User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
-               "X-Channel": "01",
-               "Content-Type": "application/json;charset=UTF-8"}
+
     response = requests.get("https://www.liaoxuefeng.com/wiki/1016959663602400", headers=headers)
     soup = BeautifulSoup(response.content, "html.parser")
     print(soup.prettify())
     # menu_tag = soup.find_all(class_="x-wiki-index-item")[1]
-    menu_tag = soup.find_all(class_="x-wiki-index-item")
+    menu_tag = soup.find_all(id="x-wiki-index")[0]
     urls = []
-    for a in menu_tag.find_all("a"):
-        url = "http://www.liaoxuefeng.com" + a.get('href')
+    for tag in menu_tag.find_all("a"):
+        url = "https://www.liaoxuefeng.com" + tag.get('href')
         urls.append(url)
     return urls
 
