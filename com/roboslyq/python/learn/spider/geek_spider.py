@@ -47,6 +47,7 @@ html_template = """
 
 def parse_url_to_html(url, name):
     try:
+        print("url--" + url)
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, 'html.parser')
         # print(soup.prettify())
