@@ -10,11 +10,17 @@ from PyPDF2 import PdfFileMerger    # pdf 合并工具包
 from bs4 import BeautifulSoup       # html解析处理包
 
 '''
-python 爬虫，可以抓取网络上的文章并且保存为Pdf
+python 爬虫Demo，抓取网络上的文章并且保存为Pdf。
 '''
+# 定义相关路径及配置
 # 定义网页入口路径
 domain_path = "https://www.liaoxuefeng.com"
 base_path = "/wiki/1016959663602400"
+# wkhtmltopdf工具安装位置（需要绝对路径，否则会报错）
+path_wk = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+# 结果文件保存路径
+result_path = r"D:\python_workspace\git\learning_python\com\roboslyq\python\learn\spider" + "\\"
 
 # 定义请求头，如果未定义可能导致https请求报503异常
 headers = {"X-Member-Id": "23832170000",
@@ -74,7 +80,7 @@ def parse_url_to_html(url, name):
 
         def func1(m):
             if not m.group(3).startswith("https"):
-                rtn = m.group(1) + "https://www.liaoxuefeng.com" + m.group(2) + m.group(3)
+                rtn = m.group(1) + domain_path + m.group(2) + m.group(3)
                 return rtn
             else:
                 return m.group(1) + m.group(2) + m.group(3)
@@ -133,10 +139,9 @@ def save_pdf(htmls, file_name):
         ],
         # 'outline-depth': 10000000,
     }
-    path_wk = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'  # 安装位置
     config = pdfkit.configuration(wkhtmltopdf=path_wk)
     # 此处需要绝对路径
-    htmls = r"D:\python_workspace\git\learning_python\com\roboslyq\python\learn\spider" + "\\" + htmls
+    htmls = result_path + htmls
     pdfkit.from_file(htmls, file_name, options=options, configuration=config)
 
 
