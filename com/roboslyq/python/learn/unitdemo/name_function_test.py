@@ -1,4 +1,6 @@
 import unittest
+
+from unitdemo.name_class import User as user
 from unitdemo.name_function import get_formatted_name
 
 """
@@ -6,24 +8,11 @@ from unitdemo.name_function import get_formatted_name
 """
 
 
-class NamesTestCase(unittest.TestCase):
-    """测试name_function.py"""
-
-    def test_first_last_name(self):
-        """能够正确地处理像Janis Joplin这样的姓名吗？"""
-        formatted_name = get_formatted_name('janis', 'joplin')
-        print("1")
-        self.assertEqual(formatted_name, 'Janis Joplin')
-
-
-class NamesTestCase1(unittest.TestCase):
-    """测试name_function.py"""
-
-    # 注意：紧跟函数名称的第一个(必须是第1个，并且不能换行)"""xx"""这种注释方式，可以被unittest打印在控制台上。
-    def test_first_last_name(self):
-        """ 能够正确地处理像Janis Joplin这样的姓名吗？--  """
-        formatted_name = get_formatted_name('janis', 'joplin')
-        self.assertEqual(formatted_name, 'Janis joplin')
+class Test1(unittest.TestCase):
+    def test_user(self):
+        user_entity1 = user("1", "luoyq")
+        print(user_entity1.print_id(), "1")
+        self.assertEqual(user_entity1.print_id(), "1")
 
 
 unittest.main()
