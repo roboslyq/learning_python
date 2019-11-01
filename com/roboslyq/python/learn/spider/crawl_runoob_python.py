@@ -73,13 +73,14 @@ def parse_url_to_html(url, name):
         body.insert(1, center_tag)
         html = str(body)
         # body中的img标签的src相对路径的改成绝对路径,注意"? src"之间有一个空格(因为有一个属性是data-src,如果不加空格会匹配到这一个属性)
-        pattern1 = "(<img .*? src=\")(.*?)(\")"
+        pattern1 = "(<img .*?src=\")(.*?)(\")"
         # iframe和img一样，如果src属性包含相对路径，则需要处理为绝对路径。否则会导致生成pdf时报NotFoundContent异常
         pattern2 = re.compile(r'(<iframe)(.*?)(</iframe>)')
 
         def func1(m):
-            if not m.group(3).startswith("https"):
-                rtn = m.group(1) + domain_path + m.group(2) + m.group(3)
+            # 注意此处是m.group(2)而不是m.group(3)
+            if not m.group(2).startswith("https"):
+                rtn = m.group(1) + "https:" + m.group(2) + m.group(3)
                 return rtn
             else:
                 return m.group(1) + m.group(2) + m.group(3)
