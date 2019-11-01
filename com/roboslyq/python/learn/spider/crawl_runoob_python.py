@@ -111,9 +111,9 @@ def get_url_list():
     for tag in menu_tag.find_all("a"):
         # if len(urls) < 3:  # 调度时限定3个文件
         href = tag.get('href')
+        # 修复异常链接(此网站的部分链接相对路径缺少/python/)
         if not str(href).startswith("/python/"):
             href = "/python/" + href
-        # 修复异常链接
         url = domain_path + href
         urls.append(url)
     return urls
@@ -150,7 +150,7 @@ def save_pdf(htmls, file_name):
 
 def main():
     start = time.time()
-    file_name = u"liaoxuefeng_Python3_tutorial"
+    file_name = u"Python3_tutorial"
     urls = get_url_list()
     for index, url in enumerate(urls):
         parse_url_to_html(url, str(index) + ".html")
@@ -165,7 +165,7 @@ def main():
     for pdf in pdfs:
         merger.append(open(pdf, 'rb'))
         print(u"合并完成第" + str(i) + '个pdf' + pdf)
-    output = open(u"廖雪峰Python_all.pdf", "wb")
+    output = open(u"Python基础教程.pdf", "wb")
     merger.write(output)
     print
     u"输出PDF成功！"
