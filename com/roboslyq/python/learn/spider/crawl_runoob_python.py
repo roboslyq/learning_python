@@ -52,7 +52,7 @@ def parse_url_to_html(url, name):
     :return: html
     """
     try:
-        print("url--" + url)
+        print("资源url--" + url)
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.content, 'html.parser')
         # print(soup.prettify())
@@ -163,12 +163,15 @@ def main():
         print(u"转换完成第" + str(i) + '个html')
     merger = PdfFileMerger()
     for pdf in pdfs:
+        # 需要使用with语法自动关闭资源，否则会导致后面资源无法清除
+        # with open(pdf, 'rb') as f:
+        #     merger.append(f)
         merger.append(open(pdf, 'rb'))
         print(u"合并完成第" + str(i) + '个pdf' + pdf)
     output = open(u"Python基础教程.pdf", "wb")
     merger.write(output)
-    print
-    u"输出PDF成功！"
+    print(u"输出PDF成功！")
+    merger.close()
     for html in htmls:
         os.remove(html)
         print
