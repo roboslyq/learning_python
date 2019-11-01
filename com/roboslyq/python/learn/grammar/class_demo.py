@@ -27,6 +27,7 @@ class Student(object):
 
 
 class clazz1():
+
     def __init__(self):
         self.val = "1"
 
@@ -35,6 +36,7 @@ class clazz1():
 
 
 class clazz2():
+
     def __init__(self):
         self.val = "2"
 
@@ -44,6 +46,7 @@ class clazz2():
 
 class clazz3(clazz1, clazz2):
     pass
+
 
 """
 可以看出多重继承的效果，clazz3已经拥有clazz1和clazz2的方法和相关属性
