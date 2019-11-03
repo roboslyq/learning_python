@@ -8,6 +8,9 @@ pattern1 = "(<img .*?src=\")(.*?)(\")"
 # iframe和img一样，如果src属性包含相对路径，则需要处理为绝对路径。否则会导致生成pdf时报NotFoundContent异常
 pattern2 = re.compile(r'(<iframe)(.*?)(</iframe>)')
 
+for i in range(0, 10):
+    print(i)
+
 
 def func1(m):
     if not m.group(2).startswith("https"):

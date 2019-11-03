@@ -1,46 +1,19 @@
 # coding=utf-8
 import logging
 import os
-import re  # 正则表达式包
+import re                               # 正则表达式包
 import time
 
-import pdfkit  # pdf 工具包
-import requests  # 网络请求包
-from PyPDF2 import PdfFileMerger  # pdf 合并工具包
-from bs4 import BeautifulSoup  # html解析处理包
+import pdfkit                           # pdf 工具包
+import requests                         # 网络请求包
+from PyPDF2 import PdfFileMerger        # pdf 合并工具包
+from bs4 import BeautifulSoup           # html解析处理包
+
+from config_demo import *
 
 '''
 python 爬虫Demo，抓取网络上的文章并且保存为Pdf。
 '''
-# 定义相关路径及配置
-# 定义网页入口路径
-domain_path = "https://www.liaoxuefeng.com"
-base_path = "/wiki/1016959663602400"
-# wkhtmltopdf工具安装位置（需要绝对路径，否则会报错）
-path_wk = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-
-# 结果文件保存路径
-result_path = r"D:\python_workspace\git\learning_python\com\roboslyq\python\learn\spider" + "\\"
-
-# 定义请求头，如果未定义可能导致https请求报503异常
-headers = {"X-Member-Id": "23832170000",
-           "X-Region": "1100000",
-           "User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
-           "X-Channel": "01",
-           "Content-Type": "application/json;charset=UTF-8"}
-
-# html模板，用来保存下载的html内容
-html_template = """
-                  <!DOCTYPE html>
-                  <html lang="en">
-                  <head>
-                    <meta charset="UTF-8">
-                  </head>
-                  <body>
-                  {content}
-                  </body>
-                  </html>
-                """
 
 
 def parse_url_to_html(url, name):
@@ -89,7 +62,7 @@ def parse_url_to_html(url, name):
         # print(html)
         html = html_template.format(content=html)
         html = html.encode("utf-8")
-        with open(name, 'wb') as f:
+        with open(download_file_path + name, 'wb') as f:
             f.write(html)
         return name
     except Exception as e:
@@ -108,9 +81,9 @@ def get_url_list():
     menu_tag = soup.find_all(id="x-wiki-index")[0]
     urls = []
     for tag in menu_tag.find_all("a"):
-        # if len(urls) < 3:  # 调度时限定3个文件
-        url = domain_path + tag.get('href')
-        urls.append(url)
+        if len(urls) < 3:  # 调度时限定3个文件
+            url = domain_path + tag.get('href')
+            urls.append(url)
     return urls
 
 
@@ -121,57 +94,48 @@ def save_pdf(htmls, file_name):
     :param file_name: pdf文件名
     :return:
     """
-    options = {
-        'page-size': 'Letter',
-        'margin-top': '0.75in',
-        'margin-right': '0.75in',
-        'margin-bottom': '0.75in',
-        'margin-left': '0.75in',
-        'encoding': "UTF-8",
-        'custom-header': [
-            ('Accept-Encoding', 'gzip')
-        ],
-        'cookie': [
-            ('cookie-name1', 'cookie-value1'),
-            ('cookie-name2', 'cookie-value2'),
-        ],
-        # 'outline-depth': 10000000,
-    }
     config = pdfkit.configuration(wkhtmltopdf=path_wk)
     # 此处需要绝对路径
-    htmls = result_path + htmls
-    pdfkit.from_file(htmls, file_name, options=options, configuration=config)
+    htmls = download_file_path + htmls
+    pdfkit.from_file(htmls, download_file_path + file_name, options=pdf_options, configuration=config)
 
 
 def main():
     start = time.time()
-    file_name = u"liaoxuefeng_Python3_tutorial"
     urls = get_url_list()
     for index, url in enumerate(urls):
         parse_url_to_html(url, str(index) + ".html")
-    htmls = []
-    pdfs = []
-    for i in range(0, len(urls) - 1):
-        htmls.append(str(i) + '.html')
-        pdfs.append(file_name + str(i) + '.pdf')
-        save_pdf(str(i) + '.html', file_name + str(i) + '.pdf')
+
+    html_list = []
+    pdf_list = []
+    # range包左不包右
+    for i in range(0, len(urls)):
+        html_list.append(str(i) + '.html')
+        pdf_list.append(tmp_file_name + str(i) + '.pdf')
+
+        save_pdf(str(i) + '.html', tmp_file_name + str(i) + '.pdf')
         print(u"转换完成第" + str(i) + '个html')
+
     merger = PdfFileMerger()
-    for pdf in pdfs:
-        merger.append(open(pdf, 'rb'))
+    for pdf in pdf_list:
+        # with open(download_file_path + pdf, 'rb') as f:
+        #     merger.append(f)
+        #     print(u"合并完成第" + str(i) + '个pdf' + pdf)
+        merger.append( open(download_file_path + pdf, 'rb'))
         print(u"合并完成第" + str(i) + '个pdf' + pdf)
-    output = open(u"廖雪峰Python_all.pdf", "wb")
+
+    output = open(download_file_path + merger_file_name, "wb")
     merger.write(output)
-    print
-    u"输出PDF成功！"
-    for html in htmls:
-        os.remove(html)
-        print
-        u"删除临时文件" + html
-    for pdf in pdfs:
-        os.remove(pdf)
-        print
-        u"删除临时文件" + pdf
+    merger.close()
+
+    print(u"输出PDF成功！")
+    for html in html_list:
+        os.remove(download_file_path + html)
+        print(u"删除临时文件" + html)
+
+    for pdf in pdf_list:
+        os.remove(download_file_path + pdf)
+        print(u"删除临时文件" + pdf)
     total_time = time.time() - start
     print(u"总共耗时：%f 秒" % total_time)
 
