@@ -1,4 +1,8 @@
 # -*- coding: UTF-8 -*-
+
+"""
+The api https://docs.python.org/3.8/library/xml.dom.html#xml.dom.NodeList.item
+"""
 from xml.dom.minidom import parse
 
 # import xml.dom.minidom
@@ -15,6 +19,7 @@ if root.hasAttribute("shelf"):
 
 # 在集合中获取所有电影
 movies = root.getElementsByTagName("movies")
+
 # 打印每部电影的详细信息
 for movie1 in movies:
     movieList = movie1.getElementsByTagName("movie")
