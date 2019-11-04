@@ -1,19 +1,54 @@
 # coding=utf-8
 import logging
 import os
-import re                               # 正则表达式包
+import re                                       # 正则表达式包
 import time
 
-import pdfkit                           # pdf 工具包
-import requests                         # 网络请求包
-from PyPDF2 import PdfFileMerger        # pdf 合并工具包
-from bs4 import BeautifulSoup           # html解析处理包
+import pdfkit                                   # pdf 工具包
+import requests                                 # 网络请求包
+from PyPDF2 import PdfFileMerger                # pdf 合并工具包
+from bs4 import BeautifulSoup                   # html解析处理包
 
 from config_demo import *
 
 '''
 python 爬虫Demo，抓取网络上的文章并且保存为Pdf。
 '''
+
+
+def reg_html(html):
+    """
+    处理html文件中的相对路径（如果不处理，生成pdf报错 ,常见的相对路径主要是图片）
+    :param html:
+    :return:
+    """
+    # body中的img标签的src相对路径的改成绝对路径,注意"? src"之间有一个空格(因为有一个属性是data-src,如果不加空格会匹配到这一个属性)
+    pattern0 = "(<img .*?src=\")(.*?)(\")(.*?)(data-src=\")(.*?)(\")"
+    pattern1 = "(<img .*?data-src=\")(.*?)(\")(.*?)(src=\")(.*?)(\")"
+    # iframe和img一样，如果src属性包含相对路径，则需要处理为绝对路径。否则会导致生成pdf时报NotFoundContent异常
+    pattern2 = re.compile(r'(<iframe)(.*?)(</iframe>)')
+
+    def func0(m):
+        if not m.group(2).startswith("https"):
+            rtn = m.group(1) + domain_path + m.group(6) + m.group(3) + m.group(4) + m.group(5) + m.group(
+                6) + m.group(7)
+            return rtn
+        else:
+            return m.group(1) + m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7)
+
+    def func1(m):
+        if not m.group(2).startswith("https"):
+            rtn = m.group(1) + m.group(2) + m.group(3) + m.group(4) + m.group(5) + domain_path + m.group(
+                2) + m.group(7)
+            return rtn
+        else:
+            return m.group(1) + m.group(2) + m.group(3) + m.group(4) + m.group(5) + m.group(6) + m.group(7)
+
+    html = re.compile(pattern0).sub(func0, html)
+    html = re.compile(pattern1).sub(func1, html)
+    # 删除iframe元素
+    html = pattern2.sub(r'', html)
+    return html
 
 
 def parse_url_to_html(url, name):
@@ -43,22 +78,8 @@ def parse_url_to_html(url, name):
         title_tag.string = title
         center_tag.insert(1, title_tag)
         body.insert(1, center_tag)
-        html = str(body)
-        # body中的img标签的src相对路径的改成绝对路径,注意"? src"之间有一个空格(因为有一个属性是data-src,如果不加空格会匹配到这一个属性)
-        pattern1 = "(<img .*? src=\")(.*?)(\")"
-        # iframe和img一样，如果src属性包含相对路径，则需要处理为绝对路径。否则会导致生成pdf时报NotFoundContent异常
-        pattern2 = re.compile(r'(<iframe)(.*?)(</iframe>)')
+        html = reg_html(str(body))
 
-        def func1(m):
-            if not m.group(3).startswith("https"):
-                rtn = m.group(1) + domain_path + m.group(2) + m.group(3)
-                return rtn
-            else:
-                return m.group(1) + m.group(2) + m.group(3)
-
-        html = re.compile(pattern1).sub(func1, html)
-        # 删除iframe元素
-        html = pattern2.sub(r'', html)
         # print(html)
         html = html_template.format(content=html)
         html = html.encode("utf-8")
@@ -81,9 +102,11 @@ def get_url_list():
     menu_tag = soup.find_all(id="x-wiki-index")[0]
     urls = []
     for tag in menu_tag.find_all("a"):
-        if len(urls) < 3:  # 调度时限定3个文件
-            url = domain_path + tag.get('href')
-            urls.append(url)
+        # if len(urls) < 3:  # 调度时限定3个文件
+        #     url = domain_path + tag.get('href')
+        #     urls.append(url)
+        url = domain_path + tag.get('href')
+        urls.append(url)
     return urls
 
 
@@ -121,7 +144,7 @@ def main():
         # with open(download_file_path + pdf, 'rb') as f:
         #     merger.append(f)
         #     print(u"合并完成第" + str(i) + '个pdf' + pdf)
-        merger.append( open(download_file_path + pdf, 'rb'))
+        merger.append(open(download_file_path + pdf, 'rb'))
         print(u"合并完成第" + str(i) + '个pdf' + pdf)
 
     output = open(download_file_path + merger_file_name, "wb")
