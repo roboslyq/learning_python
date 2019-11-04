@@ -18,8 +18,15 @@ exp:
   }
 }
 """
-user_info = {"id": "01", "name": "roboslyq"}
+address_info = {"ad1": "广州", "ad2": "上海"}
+user_info = {"id": "01", "name": "roboslyq", "address_info": address_info}
 data_info = {"phone": "110", "info": user_info}
 
 with open("user.json", "w") as user_info:
     json.dump(data_info, user_info)
+
+"""
+打印输出JSON
+"""
+with open("user.json", "r") as user_info:
+    print(user_info.data_list)
