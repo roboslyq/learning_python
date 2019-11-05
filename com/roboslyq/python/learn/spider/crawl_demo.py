@@ -1,15 +1,15 @@
 # coding=utf-8
 import logging
 import os
-import re                                       # 正则表达式包
+import re  # 正则表达式包
 import time
 
-import pdfkit                                   # pdf 工具包
-import requests                                 # 网络请求包
-from PyPDF2 import PdfFileMerger                # pdf 合并工具包
-from bs4 import BeautifulSoup                   # html解析处理包
+import pdfkit  # pdf 工具包
+import requests  # 网络请求包
+from PyPDF2 import PdfFileMerger  # pdf 合并工具包
+from bs4 import BeautifulSoup  # html解析处理包
 
-from config_demo import *
+from com.roboslyq.python.learn.spider.config_demo import *
 
 '''
 python 爬虫Demo，抓取网络上的文章并且保存为Pdf。
