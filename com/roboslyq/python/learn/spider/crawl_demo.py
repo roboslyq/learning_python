@@ -156,7 +156,7 @@ def main():
     output = open(download_file_path + merger_file_name, "wb")
     merger.write(output)
     merger.close()
-    #关闭流
+    # 关闭流
     for pdf_file in pdf_open_list:
         pdf_file.close()
 
