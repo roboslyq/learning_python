@@ -102,11 +102,11 @@ def get_url_list():
     menu_tag = soup.find_all(id="x-wiki-index")[0]
     urls = []
     for tag in menu_tag.find_all("a"):
-        # if len(urls) < 3:  # 调度时限定3个文件
-        #     url = domain_path + tag.get('href')
-        #     urls.append(url)
-        url = domain_path + tag.get('href')
-        urls.append(url)
+        if len(urls) < 3:  # 调度时限定3个文件
+            url = domain_path + tag.get('href')
+            urls.append(url)
+        # url = domain_path + tag.get('href')
+        # urls.append(url)
     return urls
 
 
@@ -140,16 +140,25 @@ def main():
         print(u"转换完成第" + str(i) + '个html')
 
     merger = PdfFileMerger()
+    pdf_open_list = []
     for pdf in pdf_list:
         # with open(download_file_path + pdf, 'rb') as f:
         #     merger.append(f)
         #     print(u"合并完成第" + str(i) + '个pdf' + pdf)
-        merger.append(open(download_file_path + pdf, 'rb'))
+        f = open(download_file_path + pdf, 'rb')
+        # merger.append(file_rd, bookmark=short_filename, import_bookmarks=import_bookmarks)
+        pdf_open_list.append(f)
+        merger.append(f)
+        # 此处不能关闭，会导致结果文件为空
+        # f.close()
         print(u"合并完成第" + str(i) + '个pdf' + pdf)
 
     output = open(download_file_path + merger_file_name, "wb")
     merger.write(output)
     merger.close()
+    #关闭流
+    for pdf_file in pdf_open_list:
+        pdf_file.close()
 
     print(u"输出PDF成功！")
     for html in html_list:
