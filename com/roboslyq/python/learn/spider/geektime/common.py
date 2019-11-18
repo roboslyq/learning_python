@@ -23,7 +23,8 @@ headers = {
 }
 # pdfkit下载相关参数
 pdf_options = {
-    'page-size': 'Letter',
+    # 'page-size': 'Letter',
+    'page-size': 'A4',
     'margin-top': '0.75in',
     'margin-right': '0.75in',
     'margin-bottom': '0.75in',

@@ -5,21 +5,26 @@ import sys
 from urllib.parse import urljoin
 import pdfkit
 from com.roboslyq.python.learn.spider.geektime.cfg import options
-from com.roboslyq.python.learn.spider.geektime.common import post, log, base_url, error_articles, create_dir, login, init, pdf_options, path_wk
+from com.roboslyq.python.learn.spider.geektime.common import post, log, base_url, error_articles, create_dir, login, \
+    init, pdf_options, path_wk
 from com.roboslyq.python.learn.spider.geektime.models import Product, Article
+from PyPDF2 import PdfFileMerger  # pdf 合并工具包
 
 
-def get_all_products():
+def get_all_products(product_array):
     """
     获取已购买的所有产品(专栏)
     :return: 专栏id和专栏标题的字典
     """
-    response = post(urljoin(base_url, 'my/products/all'))
-    data = response.json(encoding='utf-8')['data']
-    if len(data) == 0 or len(data[0]['list']) == 0:
-        raise Exception("没有购买的专栏")
-    log.info("get products success")
-    return [Product(d['extra']['column_id'], d['title']) for d in data[0]['list']]
+    if product_array is not None:
+        return product_array  # 表示指定了下载内容，直接返回
+    else:
+        response = post(urljoin(base_url, 'my/products/all'))
+        data = response.json(encoding='utf-8')['data']
+        if len(data) == 0 or len(data[0]['list']) == 0:
+            raise Exception("没有购买的专栏")
+        log.info("get products success")
+        return [Product(d['extra']['column_id'], d['title']) for d in data[0]['list']]
 
 
 def get_all_products_callback(products):
@@ -62,17 +67,26 @@ def get_all_articles_callback(articles, product):
     path = options.save_dir
     product_path = os.path.join(path, str(product.id))
     create_dir(product_path)
+
+    pdf_list = []
+    pdf_tag = []  # pdf页签
     for article in articles:
         title = article.title.replace(' ', '_').replace('|', '').replace('：', '').replace('?', '').replace('（', '') \
             .replace('）', '').replace('/', '').replace('*', '').replace('?', '').replace('？', '')
         article_path = os.path.join(
             product_path,
             article.id
-            )
-
-            # '{}_{}.pdf'.format(article.id, title))
-
+        )
+        # title中包含中文字符,会导致Pdf写文件失败,所以此处只保存id作为临时文件名称
+        # '{}_{}.pdf'.format(article.id, title))
         article_id_path = os.path.join(product_path, '{}.pdf'.format(article.id))
+        # 保存文件到list中，合并时使用
+        pdf_list.append(article_id_path)
+        if article.title is not None:
+            pdf_tag.append(article.title)
+        else:
+            pdf_tag.append(article_id_path)
+        # 检查是否曾经下载过，如果曾经下载载则直接返回
         if os.path.exists(article_path) or os.path.exists(article_id_path):
             continue
         try:
@@ -83,6 +97,8 @@ def get_all_articles_callback(articles, product):
             error_articles.append(article)
             continue
         write_pdf(article, article_path, article_id_path)
+    # 合并PDF
+    merge_pdf(product_path, pdf_list, pdf_tag)
 
 
 def write_pdf(article, article_path, article_id_path):
@@ -96,7 +112,7 @@ def write_pdf(article, article_path, article_id_path):
     try:
         log.info('write %s' % article_path)
         config = pdfkit.configuration(wkhtmltopdf=path_wk)
-        pdfkit.from_string(article.content, article_path, options=pdf_options, configuration=config)
+        pdfkit.from_string(article.content, article_id_path, options=pdf_options, configuration=config)
     except OSError:
         try:
             log.info('write %s' % article_id_path)
@@ -107,6 +123,38 @@ def write_pdf(article, article_path, article_id_path):
     except Exception as e:
         log.error(str(e))
         error_articles.append(article)
+
+
+def merge_pdf(product_path, pdf_list, pdf_tag):
+    """
+    合并PDF
+    :param pdf_tag:
+    :param list_pdf: pdf集合
+    :param file_name: 合并文件名称
+    :return:
+    """
+    #  合并
+    merger = PdfFileMerger()
+    pdf_open_list = []
+    i = 0
+    for pdf in pdf_list:
+        # with open(download_file_path + pdf, 'rb') as f:
+        #     merger.append(f)
+        #     print(u"合并完成第" + str(i) + '个pdf' + pdf)
+        print(u"合并第" + str(i) + '个pdf' + pdf + "开始")
+        tagi = pdf_tag[i]
+        f = open(pdf, 'rb')
+        # merger.append(file_rd, bookmark=short_filename, import_bookmarks=import_bookmarks)
+        pdf_open_list.append(f)
+        merger.append(f, bookmark=tagi, import_bookmarks=True)
+        # 此处不能关闭，会导致结果文件为空
+        # f.close()
+        print(u"合并完成第" + str(i) + '个pdf' + pdf)
+        i = i + 1
+    output = open(os.path.join(product_path, '{}.pdf'.format('merged_all')), "wb")
+    merger.write(output)
+    merger.close()
+    # TODO 关闭相关文件
 
 
 def get_article_content(article):
@@ -124,9 +172,10 @@ def get_article_content(article):
     response = post(urljoin(base_url, 'article'), payload)
     log.info("gat article success for article(id=%s, title=%s)" % (article.id, article.title))
     data = response.json(encoding='utf-8')['data']
+    html_title = '<center><h1>' + article.title + '<h1></center>'
     if 'article_content' not in data:
         raise Exception("no article content, data is: %s" % json.dumps(data, indent=4))
-    return '<meta charset="utf-8">%s' % data['article_content']
+    return '<meta charset="utf-8">' + html_title + data['article_content']
 
 
 def main():
@@ -135,10 +184,12 @@ def main():
     :return:
     """
     init()
+    # 若product_array空时，表示全部下载。
+    product_array = [Product('126', '数据结构与算法之美')]
     log.info("start--------------")
     try:
         login(options.cell_phone, options.password)
-        get_all_products_callback(get_all_products())
+        get_all_products_callback(get_all_products(product_array))
     except KeyboardInterrupt:
         log.info("exit...")
     except Exception as e:

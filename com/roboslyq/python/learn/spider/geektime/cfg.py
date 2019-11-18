@@ -14,6 +14,9 @@ descriptions = {
     2、然后创建optparse对象parser ： optparse.OptionParser()
     3、再使用add_option()来定义命令行参数： parser.add_option(）
     4、最后使用parse_args()来解析命令行: parser.add_option()
+    
+    传参Demo： --cell-phone=1588993xxxx --password=xxxx --save-dir=D:\360Downloads
+    
 """
 # init options
 parser = optparse.OptionParser()
