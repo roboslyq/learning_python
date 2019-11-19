@@ -14,6 +14,7 @@ from PyPDF2 import PdfFileMerger  # pdf 合并工具包
 def get_all_products(product_array):
     """
     获取已购买的所有产品(专栏)
+    TODO: 极客时间对my/products/all做了分页，当前只实现了第一页的数据获取
     :return: 专栏id和专栏标题的字典
     """
     if product_array is not None:
@@ -68,7 +69,7 @@ def get_all_articles_callback(articles, product):
     product_path = os.path.join(path, str(product.id))
     create_dir(product_path)
 
-    pdf_list = []
+    pdf_list = []  # pdf文件，供关闭文件流时使用
     pdf_tag = []  # pdf页签
     for article in articles:
         title = article.title.replace(' ', '_').replace('|', '').replace('：', '').replace('?', '').replace('（', '') \
@@ -82,7 +83,7 @@ def get_all_articles_callback(articles, product):
         article_id_path = os.path.join(product_path, '{}.pdf'.format(article.id))
         # 保存文件到list中，合并时使用
         pdf_list.append(article_id_path)
-        if article.title is not None:
+        if article.title is not None:  # (如果title包含有中文或者特殊字符，会导致写pdf失败。)
             pdf_tag.append(article.title)
         else:
             pdf_tag.append(article_id_path)
@@ -128,9 +129,9 @@ def write_pdf(article, article_path, article_id_path):
 def merge_pdf(product_path, pdf_list, pdf_tag):
     """
     合并PDF
-    :param pdf_tag:
-    :param list_pdf: pdf集合
-    :param file_name: 合并文件名称
+    :param pdf_list:  pdf集合
+    :param product_path:
+    :param pdf_tag: 与每个pdf对应的页签
     :return:
     """
     #  合并
