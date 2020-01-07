@@ -11,5 +11,3 @@ html_fle = r'D:\result.html'
 html = PyDocX.to_html(docx_file)
 with open(html_fle, encoding='UTF-8', mode='w') as f:
     f.write(html)
-    f.flush()
-    f.close()

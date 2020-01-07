@@ -1,6 +1,11 @@
 from numpy import *
+import sympy as sp
 
 """
-生成对象矩阵，可以用来测试numpy是否安装成功
+
 """
 print(eye(4))
+
+x = sp.Symbol('x')
+y = sp.Symbol('y')
+print(sp.solve([x - 4 * y, x + y - 75], [x, y]))
