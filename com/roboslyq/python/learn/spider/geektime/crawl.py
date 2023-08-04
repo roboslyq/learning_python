@@ -21,7 +21,8 @@ def get_all_products(product_array):
         return product_array  # 表示指定了下载内容，直接返回
     else:
         response = post(urljoin(base_url, 'my/products/all'))
-        data = response.json(encoding='utf-8')['data']
+        # data = response.json(encoding='utf-8')['data']
+        data = response.json()['data']
         if len(data) == 0 or len(data[0]['list']) == 0:
             raise Exception("没有购买的专栏")
         log.info("get products success")
@@ -53,7 +54,8 @@ def get_all_articles(product):
     }
     response = post(urljoin(base_url, 'column/articles'), payload)
     log.info("gat all articles success for product(id=%s, title=%s)" % (product.id, product.title))
-    data = response.json(encoding='utf-8')['data']
+    # data = response.json(encoding='utf-8')['data']
+    data = response.json()['data']
     return [Article(str(d['id']), d['article_title']) for d in data['list']]
 
 
@@ -172,7 +174,7 @@ def get_article_content(article):
     log.info("prepare to get article(%s)" % article)
     response = post(urljoin(base_url, 'article'), payload)
     log.info("gat article success for article(id=%s, title=%s)" % (article.id, article.title))
-    data = response.json(encoding='utf-8')['data']
+    data = response.json()['data']
     html_title = '<center><h1>' + article.title + '<h1></center>'
     if 'article_content' not in data:
         raise Exception("no article content, data is: %s" % json.dumps(data, indent=4))

@@ -134,15 +134,23 @@ def login(cell_phone, password):
         'Content-Type': "application/json",
         'Referer': "https://account.geekbang.org",
         'Host': "account.geekbang.org",
+        'User-Agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
     }
     data = {
         "country": 86,
         "cellphone": cell_phone,
         "password": password,
-        "captcha": "",
         "remember": 1,
         "platform": 3,
-        "appid": 1
+        "appid": 1,
+        "source": "",
+        "ucode": "",
+        "sc": {
+            "uid": "",
+            "report_source": "Web",
+            "user_unique_id": "7263031044633465609",
+            "refer": "极客时间"
+        }
     }
     assert cell_phone is not None and password is not None
     response = post(account_url, data, hs=login_headers)
