@@ -3,7 +3,6 @@ import shutil
 import subprocess
 import os
 import traceback
-import sys
 
 
 def copy_files_from_list(file_list_path, destination_directory):
@@ -13,6 +12,7 @@ def copy_files_from_list(file_list_path, destination_directory):
         while source_file:
             source_file_name = os.path.basename(source_file)
             source_file_path = source_file.strip("\n")
+            # 如果是Linux或者mac，则使用“/”拼接
             destination_file = destination_directory + "\\" + source_file_name.strip()
             try:
                 shutil.copy(source_file_path, destination_file)
@@ -30,10 +30,14 @@ def compress_directory(directory_path, output_file):
 
 
 def main():
+    """
+    定义主函数
+    :return:
+    """
     # 清单文件的路径
-    file_list_path = 'file_list.txt'
+    file_list_path = './file_list.txt'
     # 目标目录
-    destination_directory = 'E:/workspace_python/github/learning_python/com/roboslyq/python/tools/target'
+    destination_directory = './target'
     # 复制文件到目标目录
     copy_files_from_list(file_list_path, destination_directory)
     # 需要压缩打包的目录
@@ -45,4 +49,5 @@ def main():
 
 
 if __name__ == '__main__':
+    """调用入口"""
     main()

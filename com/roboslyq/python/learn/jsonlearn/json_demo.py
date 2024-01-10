@@ -29,4 +29,5 @@ with open("user.json", "w") as user_info:
 打印输出JSON
 """
 with open("user.json", "r") as user_info:
-    print(user_info.data_list)
+    data = json.loads(user_info.read())
+    print(data["phone"])
