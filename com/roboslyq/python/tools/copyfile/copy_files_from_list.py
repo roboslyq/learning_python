@@ -35,7 +35,7 @@ def main():
     :return:
     """
     # 清单文件的路径
-    file_list_path = './file_list.txt'
+    file_list_path = 'file_list.txt'
     # 目标目录
     destination_directory = './target'
     # 复制文件到目标目录
