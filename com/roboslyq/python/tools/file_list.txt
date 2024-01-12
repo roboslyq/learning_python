@@ -1,3 +1,0 @@
-E:/workspace_python/github/learning_python/com/roboslyq/python/tools/c.txt
-E:/workspace_python/github/learning_python/com/roboslyq/python/tools/b.txt
-E:/workspace_python/github/learning_python/com/roboslyq/python/tools/a.txt
