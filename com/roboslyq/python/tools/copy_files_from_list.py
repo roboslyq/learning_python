@@ -7,7 +7,9 @@ import sys
 
 
 def copy_files_from_list(file_list_path, destination_directory):
-    """Copies files from list:根据清单复制文件"""
+    """Copies files from list:根据清单复制文件
+        python2.7版本写法，兼容linux默认自带的Python版本
+    """
     with open(file_list_path, 'r') as listFile:
         source_file = listFile.readline()
         while source_file:
